@@ -12,7 +12,7 @@ class _QuizPageState extends State<QuizPage> {
   int score = 0;
   int questionIndex = 0;
   int lives=3;
-  int totalTime=5;
+  int totalTime=120;
   Timer?timer2;
   double progressValue=1.0;
   List<Question> questions = [
@@ -64,10 +64,19 @@ class _QuizPageState extends State<QuizPage> {
     timer = Timer.periodic(Duration(seconds: 1), (Timer t) {
       setState(() {
         if (secondsRemaining < 1) {
-          t.cancel();
-          // Timer is complete, navigate to final page or perform any other actions
-          moveToNext();
-        } else {
+          lives--;
+          if (lives <= 0) {
+            // No more lives, end the quiz
+            t.cancel();
+            navigateToFinalPage();
+          }
+          else {
+            // Reset the time for the next question
+            moveToNext();
+            secondsRemaining = 5;
+          }
+        }
+        else {
           secondsRemaining--;
         }
       });
@@ -91,18 +100,11 @@ class _QuizPageState extends State<QuizPage> {
       setState(() {
         if (totalTime > 0) {
           totalTime--;
-          progressValue = totalTime / 5;
+          progressValue = totalTime / 120;
         } else {
           // Time runs out, reduce a life and check if the quiz should end
-          lives--;
-          if (lives <= 0) {
-            // No more lives, end the quiz
-            timer2.cancel();
-            navigateToFinalPage();
-          } else {
-            // Reset the time for the next question
-            totalTime = 5;
-          }
+        timer2.cancel();
+        navigateToFinalPage();
         }
       });
     });
